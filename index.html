@@ -1,1 +1,238 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Blog & Game Website</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      max-width: 900px;
+      margin: auto;
+      padding: 20px;
+      background: #f9f9f9;
+    }
+    h1, h2 {
+      text-align: center;
+    }
+    /* Blog styles */
+    #blog {
+      background: white;
+      padding: 20px;
+      border-radius: 8px;
+      margin-bottom: 40px;
+      box-shadow: 0 0 10px #ccc;
+    }
+    #posts {
+      margin-top: 20px;
+    }
+    .post {
+      border-bottom: 1px solid #ddd;
+      padding-bottom: 10px;
+      margin-bottom: 10px;
+    }
+    .post:last-child {
+      border-bottom: none;
+    }
+    label, input, textarea, button {
+      display: block;
+      width: 100%;
+      margin-bottom: 10px;
+    }
+    input, textarea {
+      padding: 8px;
+      font-size: 16px;
+    }
+    button {
+      background-color: #007bff;
+      color: white;
+      border: none;
+      padding: 12px;
+      cursor: pointer;
+      font-weight: bold;
+      border-radius: 4px;
+    }
+    button:hover {
+      background-color: #0056b3;
+    }
+
+    /* Game styles */
+    #game {
+      background: white;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 0 10px #ccc;
+      text-align: center;
+    }
+    #gameCanvas {
+      border: 1px solid #333;
+      background-color: #222;
+      margin-top: 20px;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>My Blog & Game Website</h1>
+
+  <!-- Blog Section -->
+  <section id="blog">
+    <h2>Blog</h2>
+    <form id="blogForm">
+      <label for="title">Post Title</label>
+      <input type="text" id="title" required />
+
+      <label for="content">Content</label>
+      <textarea id="content" rows="5" required></textarea>
+
+      <button type="submit">Add Post</button>
+    </form>
+
+    <div id="posts">
+      <!-- Posts will appear here -->
+    </div>
+  </section>
+
+  <!-- Game Section -->
+  <section id="game">
+    <h2>Simple Catch Game</h2>
+    <p>Use left and right arrow keys to catch the falling balls.</p>
+    <canvas id="gameCanvas" width="600" height="400"></canvas>
+    <p>Score: <span id="score">0</span></p>
+  </section>
+
+<script>
+  // BLOG FUNCTIONALITY
+  const blogForm = document.getElementById('blogForm');
+  const postsDiv = document.getElementById('posts');
+
+  blogForm.addEventListener('submit', function(e) {
+    e.preventDefault();
+    const title = document.getElementById('title').value.trim();
+    const content = document.getElementById('content').value.trim();
+
+    if(title && content) {
+      const postEl = document.createElement('div');
+      postEl.className = 'post';
+
+      postEl.innerHTML = `<h3>${title}</h3><p>${content}</p>`;
+      postsDiv.prepend(postEl);
+
+      blogForm.reset();
+    }
+  });
+
+  // GAME FUNCTIONALITY
+  const canvas = document.getElementById('gameCanvas');
+  const ctx = canvas.getContext('2d');
+  const scoreEl = document.getElementById('score');
+
+  const player = {
+    width: 100,
+    height: 15,
+    x: canvas.width / 2 - 50,
+    y: canvas.height - 30,
+    speed: 7,
+    dx: 0
+  };
+
+  const ball = {
+    x: Math.random() * (canvas.width - 20) + 10,
+    y: 0,
+    radius: 10,
+    speed: 3
+  };
+
+  let score = 0;
+
+  // Draw player (catcher)
+  function drawPlayer() {
+    ctx.fillStyle = '#0f0';
+    ctx.fillRect(player.x, player.y, player.width, player.height);
+  }
+
+  // Draw ball
+  function drawBall() {
+    ctx.beginPath();
+    ctx.arc(ball.x, ball.y, ball.radius, 0, Math.PI * 2);
+    ctx.fillStyle = '#f00';
+    ctx.fill();
+    ctx.closePath();
+  }
+
+  // Move player
+  function movePlayer() {
+    player.x += player.dx;
+    // Boundaries
+    if(player.x < 0) player.x = 0;
+    if(player.x + player.width > canvas.width) player.x = canvas.width - player.width;
+  }
+
+  // Move ball
+  function moveBall() {
+    ball.y += ball.speed;
+
+    // Check collision with player
+    if (
+      ball.y + ball.radius >= player.y &&
+      ball.x >= player.x &&
+      ball.x <= player.x + player.width
+    ) {
+      score++;
+      scoreEl.textContent = score;
+      resetBall();
+    }
+
+    // Reset ball if missed
+    if(ball.y > canvas.height) {
+      resetBall();
+    }
+  }
+
+  // Reset ball position
+  function resetBall() {
+    ball.x = Math.random() * (canvas.width - 20) + 10;
+    ball.y = 0;
+  }
+
+  // Clear canvas
+  function clear() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+  }
+
+  // Update game frame
+  function update() {
+    clear();
+    drawPlayer();
+    drawBall();
+    movePlayer();
+    moveBall();
+
+    requestAnimationFrame(update);
+  }
+
+  // Key handlers
+  function keyDownHandler(e) {
+    if(e.key === 'ArrowRight') {
+      player.dx = player.speed;
+    } else if(e.key === 'ArrowLeft') {
+      player.dx = -player.speed;
+    }
+  }
+
+  function keyUpHandler(e) {
+    if(e.key === 'ArrowRight' || e.key === 'ArrowLeft') {
+      player.dx = 0;
+    }
+  }
+
+  document.addEventListener('keydown', keyDownHandler);
+  document.addEventListener('keyup', keyUpHandler);
+
+  // Start the game loop
+  update();
+</script>
+
+</body>
+</html>
 
